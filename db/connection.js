@@ -6,7 +6,7 @@ mongoose.connect(process.env.ATLSURL,  {
             useunifiedtropology:true,
             urlencoded:true
         } ,(err) => {
-  if (err) console.log(err);
+  if (err)return console.log(err);
   console.log("connect success");
 });
 // fK31oBGl445hbuIM
