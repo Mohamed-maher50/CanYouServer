@@ -155,6 +155,7 @@ const checkEmailExist = async (email, { req }) => {
   if (!user) return Promise.reject("can't not found this account");
   req.body.hashPassword = user.password;
   req.body.user = user;
+  return true;
 };
 module.exports = {
   Avatar,
