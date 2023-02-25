@@ -24,7 +24,7 @@ app.use(express.json());
 
 app.use(require("./routes/user"));
 app.use(require("./routes/Postes"));
-const server = app.listen(process.env.PORT, () => {
+const server = app.listen(PORT, () => {
   console.log("listen in port 4000");
 });
 const io = require("socket.io")(server, {
