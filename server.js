@@ -9,7 +9,7 @@ morgan("tiny");
 app.use("/avatar", express.static(__dirname + "/uploads/avatar"));
 app.use(
   cors({
-    origin: ['https://shopapp-8faf7.firebaseapp.com/',"http://localhost:3000"],
+    origin: 'https://shopapp-8faf7.firebaseapp.com/',
     credentials: true,
   })
 );
