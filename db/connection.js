@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 <<<<<<< HEAD
 mongoose.connect(
-  process.env.DB_CONNECTION_URL,
+  process.env.ATLSURL,
   { useNewUrlParser: true },
   (err) => {
     if (err) return console.log(err);
