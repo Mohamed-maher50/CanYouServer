@@ -1,7 +1,7 @@
 const User = require("../model/useSchema");
+const jwt = require("jsonwebtoken");
 const Post = require("../model/Post");
 const { validationResult } = require("express-validator/src/validation-result");
-
 const Avatar = async (req, res) => {
   if (!req.file) return res.status(500).json({ msg: "not choose" });
   const imgUrl =
@@ -36,6 +36,7 @@ const addSkill = async (req, res) => {
     },
     { new: true }
   ).select("skills -_id");
+
   res.status(200).json(JSON.stringify(skills));
 };
 const getSkills = async (req, res) => {
@@ -99,7 +100,7 @@ const SendFollow = async (req, res) => {
 const getCardInfo = async (req, res) => {
   const { id } = req.params;
   const user = await User.findById(id).select(
-    " followers following fullName AvatarUrl"
+    "followers following fullName AvatarUrl"
   );
 
   res.status(200).json(JSON.stringify(user));
@@ -149,12 +150,11 @@ const firstVisit = async (req, res) => {
   }
 };
 const checkEmailExist = async (email, { req }) => {
-  console.log(email);
   const user = await User.findOne({ email });
-  console.log(email);
   if (!user) return Promise.reject("can't not found this account");
   req.body.hashPassword = user.password;
   req.body.user = user;
+  return true;
 };
 module.exports = {
   Avatar,

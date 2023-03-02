@@ -2,7 +2,6 @@ const jwt = require("jsonwebtoken");
 const { default: mongoose } = require("mongoose");
 const User = require("../model/useSchema");
 const protect = async (req, res, next) => {
-  console.log(req.body);
   var token = req.headers.authorization?.split(" ")[1];
   req.token = token;
 
@@ -17,8 +16,8 @@ const protect = async (req, res, next) => {
         return result;
       }
     );
-    if (result.msg) return res.status(401).send("please try login");
-    if (!result) return res.status(401).send("unauthorized");
+    if (result.msg) return res.status(400).send("please try login");
+    if (!result) return res.status(400).send("unauthorized");
     req.userId = result;
 
     next();

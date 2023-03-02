@@ -26,7 +26,7 @@ const {
   checkEmailExist,
 } = require("../controllers/userControllers");
 const { protect } = require("../utils/protect");
-const { body } = require("express-validator");
+const { body, param } = require("express-validator");
 const { verifyPassword } = require("../utils/hashPassword");
 const { Register, Login } = require("../controllers/auth");
 
@@ -40,11 +40,14 @@ router.post(
     .withMessage("this account already exist"),
   body("firstName").trim().not().isEmpty().withMessage("firstName is required"),
   body("lastName").trim().not().isEmpty().withMessage("lastName is required"),
+  body("city").trim().not().isEmpty(),
   body("password")
     .not()
     .isEmpty()
     .trim()
     .custom((password, { req }) => {
+      console.log(password);
+      console.log(req.body);
       if (password != req.body.confirmPassword)
         return Promise.reject("password not equal confirm password");
       return true;
@@ -69,4 +72,5 @@ router.get("/profile/:id", getUser);
 router.put("/profile/follow", protect, SendFollow);
 router.post("/createPost", protect, postNewPost);
 router.put("/firstVisit", protect, firstVisit);
+
 module.exports = router;

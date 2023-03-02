@@ -49,6 +49,23 @@ const userSchema = new mongoose.Schema({
       ref: "Post",
     },
   ],
+  requestsPost: [
+    {
+      type: mongoose.Types.ObjectId,
+      ref: "Request",
+    },
+  ],
+  city: {
+    type: String,
+    default: "Cairo",
+  },
+  chats: [
+    {
+      type: mongoose.Types.ObjectId,
+      default: [],
+      ref: "Chat",
+    },
+  ],
 });
 
 userSchema.pre("save", async function () {

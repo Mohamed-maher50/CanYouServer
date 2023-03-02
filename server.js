@@ -15,40 +15,38 @@ app.use(
 );
 const helmet = require("helmet");
 app.use(helmet());
-app.use(morgan("tiny"));
+// app.use(morgan("tiny"));
 require("dotenv").config();
 require("./db/connection");
 const PORT = process.env.PORT || 4000;
 //
 app.use(express.json());
-
+app.use(require("./routes/ChatRoute"));
 app.use(require("./routes/user"));
 app.use(require("./routes/Postes"));
+app.use("/api", require("./routes/Requests"));
+
 const server = app.listen(PORT, () => {
   console.log("listen in port 4000");
 });
 const io = require("socket.io")(server, {
-  // pingTimeout: 60000,
+  pingTimeout: 1000,
   cors: {
     origin: "http://localhost:3000",
   },
 });
+module.exports = {
+  io,
+};
+require("./socketRequests/socketRequest");
 io.on("connection", (socket) => {
-  console.log("connected");
   socket.on("setup", (roomId) => {
-    console.log("setup done", roomId);
     socket.join(roomId);
   });
   socket.on("joinWith", (roomId) => {
-    console.log("joinWith");
-    console.log(roomId);
     socket.join(roomId);
   });
   socket.on("newMessage", ({ roomId, data }) => {
-    console.log(roomId);
-    console.log("first");
-    console.log(socket.rooms);
-    console.log(data);
     io.to(roomId).emit("receivedMessage", data);
   });
 });
