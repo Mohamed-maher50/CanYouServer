@@ -9,9 +9,7 @@ app.use(express.json());
 app.use(express.text());
 morgan("tiny");
 app.use("/avatar", express.static(__dirname + "/uploads/avatar"));
-app.use(
-  cors()
-);
+app.use(cors());
 const helmet = require("helmet");
 app.use(helmet());
 
