@@ -14,6 +14,7 @@ app.use(
     origin: [
       "https://shopapp-8faf7.firebaseapp.com",
       "https://shopapp-8faf7.web.app",
+      "https://shopapp-8faf7.firebaseapp.com/"
     ],
     credentials: true,
   })
