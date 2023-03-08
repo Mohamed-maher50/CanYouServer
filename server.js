@@ -11,13 +11,20 @@ morgan("tiny");
 app.use("/avatar", express.static(__dirname + "/uploads/avatar"));
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: [
+      "https://shopapp-8faf7.firebaseapp.com",
+      "https://shopapp-8faf7.web.app",
+    ],
     credentials: true,
   })
 );
 const helmet = require("helmet");
 app.use(helmet());
+
 app.use(morgan("tiny"));
+
+app.use(morgan("tiny"));
+
 require("dotenv").config();
 require("./db/connection");
 const PORT = process.env.PORT || 4000;
