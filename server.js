@@ -15,8 +15,6 @@ app.use(helmet());
 
 app.use(morgan("tiny"));
 
-app.use(morgan("tiny"));
-
 require("dotenv").config();
 require("./db/connection");
 const PORT = process.env.PORT || 4000;
