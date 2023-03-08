@@ -3,10 +3,7 @@ const jwt = require("jsonwebtoken");
 const Post = require("../model/Post");
 const { validationResult } = require("express-validator/src/validation-result");
 const Avatar = async (req, res) => {
-  if (!req.file) return res.status(500).json({ msg: "not choose" });
-  const imgUrl =
-    req.protocol + "://" + req.get("host") + "/avatar/" + req.file.filename;
-  console.log(imgUrl);
+  const { imgUrl } = req.body;
   try {
     const userExist = await User.findByIdAndUpdate(
       req.userId,
@@ -25,8 +22,7 @@ const Avatar = async (req, res) => {
 };
 const addSkill = async (req, res) => {
   const { data } = req.body;
-  if (!data)
-    return res.status(400).json(JSON.stringify({ msg: "Enter Value" }));
+  if (!data) return res.status(400).json("Enter Value");
   const skills = await User.findByIdAndUpdate(
     req.userId,
     {
@@ -37,11 +33,11 @@ const addSkill = async (req, res) => {
     { new: true }
   ).select("skills -_id");
 
-  res.status(200).json(JSON.stringify(skills));
+  res.status(200).json(skills);
 };
 const getSkills = async (req, res) => {
   const skills = await User.findById(req.userId).select("skills -_id");
-  res.status(200).json(JSON.stringify(skills));
+  res.status(200).json(skills);
 };
 const SearchUsers = async (req, res) => {
   try {
@@ -156,6 +152,26 @@ const checkEmailExist = async (email, { req }) => {
   req.body.user = user;
   return true;
 };
+const deleteSkill = async (req, res) => {
+  const { skill } = req.params;
+  console.log(req.params);
+  try {
+    await User.findByIdAndUpdate(
+      req.userId,
+      {
+        $pull: {
+          skills: skill,
+        },
+      },
+      {
+        new: true,
+      }
+    );
+    res.sendStatus(201);
+  } catch (error) {
+    res.status(500).json({ msg: "some error in server delete skill" });
+  }
+};
 module.exports = {
   Avatar,
   addSkill,
@@ -167,4 +183,5 @@ module.exports = {
   postNewPost,
   firstVisit,
   checkEmailExist,
+  deleteSkill,
 };

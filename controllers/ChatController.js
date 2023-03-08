@@ -37,6 +37,30 @@ const sendMessage = async (req, res) => {
     res.status(500).json({ msg: "some error" });
   }
 };
+const getChatId = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json(errors);
+  try {
+    const chat = await Chat.findOne({
+      $and: [
+        { users: { $elemMatch: { $eq: req.userId } } },
+        { users: { $elemMatch: { $eq: req.params.chatWith } } },
+      ],
+    });
+    if (!chat) {
+      const newChat = await Chat.create({
+        users: [req.userId, req.params.chatWith],
+        messages: [],
+      });
+      return res.status(200).json(newChat);
+    }
+    res.status(200).json(chat);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ msg: "not allowed" });
+  }
+};
 module.exports = {
   sendMessage,
+  getChatId,
 };

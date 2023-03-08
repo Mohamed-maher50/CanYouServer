@@ -1,10 +1,12 @@
 const express = require("express");
 const app = express();
 app.use(express.urlencoded({ extended: true }));
-app.use(require("cookie-parser")());
+// app.use(require("cookie-parser")());
 const cors = require("cors");
 var morgan = require("morgan");
+app.use(express.json());
 
+app.use(express.text());
 morgan("tiny");
 app.use("/avatar", express.static(__dirname + "/uploads/avatar"));
 app.use(
@@ -15,17 +17,19 @@ app.use(
 );
 const helmet = require("helmet");
 app.use(helmet());
-// app.use(morgan("tiny"));
+app.use(morgan("tiny"));
 require("dotenv").config();
 require("./db/connection");
 const PORT = process.env.PORT || 4000;
 //
-app.use(express.json());
+
 app.use(require("./routes/ChatRoute"));
 app.use(require("./routes/user"));
 app.use(require("./routes/Postes"));
 app.use("/api", require("./routes/Requests"));
-
+app.use((req, res) => {
+  res.status(404).json({ msg: "not found this route" });
+});
 const server = app.listen(PORT, () => {
   console.log("listen in port 4000");
 });
