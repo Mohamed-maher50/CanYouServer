@@ -10,14 +10,7 @@ app.use(express.text());
 morgan("tiny");
 app.use("/avatar", express.static(__dirname + "/uploads/avatar"));
 app.use(
-  cors({
-    origin: [
-      "https://shopapp-8faf7.firebaseapp.com",
-      "https://shopapp-8faf7.web.app",
-      "https://shopapp-8faf7.firebaseapp.com/"
-    ],
-    credentials: true,
-  })
+  cors()
 );
 const helmet = require("helmet");
 app.use(helmet());
