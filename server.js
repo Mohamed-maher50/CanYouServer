@@ -7,7 +7,7 @@ app.use(express.json());
 
 app.use(express.text());
 morgan("tiny");
-<<<<<<< HEAD
+
 
 app.use(
   cors({
@@ -19,10 +19,10 @@ app.use(
     credentials: true,
   })
 );
-=======
+
 app.use("/avatar", express.static(__dirname + "/uploads/avatar"));
 app.use(cors());
->>>>>>> e80f9065593e6e9b4c311c5c1d7fbb7d1bbbc3dc
+
 const helmet = require("helmet");
 app.use(helmet());
 
