@@ -1,6 +1,10 @@
 const router = require("express").Router();
 const { body, param } = require("express-validator");
-const { sendMessage, getChatId } = require("../controllers/ChatController");
+const {
+  sendMessage,
+
+  getChat,
+} = require("../controllers/ChatController");
 const { protect } = require("../utils/protect");
 const { isId } = require("../utils/validations");
 router.post(
@@ -18,6 +22,6 @@ router.get(
     .custom(isId)
     .withMessage("not found id pram"),
   protect,
-  getChatId
+  getChat
 );
 module.exports = router;

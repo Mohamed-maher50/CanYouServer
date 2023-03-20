@@ -12,47 +12,53 @@ const sendMessage = async (req, res) => {
       sender: req.userId,
       content: req.body.content,
     }).save();
-    const chat = await Chat.findOne({
-      $and: [
-        { users: { $elemMatch: { $eq: req.params.id } } },
-        { users: { $elemMatch: { $eq: req.userId } } },
-      ],
-    });
-
-    if (!chat) {
-      const newChat = await Chat.create({
-        users: [req.userId, req.params.id],
-        messages: [newMessage._id],
-      });
-    } else {
+    const chat = await Chat.findById(req.params.id);
+    if (chat)
       await chat.updateOne({
         $push: {
           messages: newMessage._id,
         },
       });
-    }
-    res.send("done");
+    res.status(200).json(newMessage);
   } catch (error) {
     console.log(error);
     res.status(500).json({ msg: "some error" });
   }
 };
-const getChatId = async (req, res) => {
+const getChat = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json(errors);
   try {
     const chat = await Chat.findOne({
       $and: [
-        { users: { $elemMatch: { $eq: req.userId } } },
         { users: { $elemMatch: { $eq: req.params.chatWith } } },
+        { users: { $elemMatch: { $eq: req.userId } } },
       ],
-    });
+    })
+      .populate({
+        path: "users",
+        select: "AvatarUrl fullName",
+        model: "Users",
+      })
+      .populate({
+        path: "messages",
+        options: {
+          sort: { createdAt: 1 },
+        },
+        populate: {
+          path: "sender",
+          select: "AvatarUrl fullName",
+          model: "Users",
+        },
+      });
+
     if (!chat) {
-      const newChat = await Chat.create({
+      const createChat = await Chat.create({
         users: [req.userId, req.params.chatWith],
         messages: [],
       });
-      return res.status(200).json(newChat);
+      const chat = await Chat.findById(createChat._id).populate("users");
+      return res.status(200).json(chat);
     }
     res.status(200).json(chat);
   } catch (error) {
@@ -62,5 +68,5 @@ const getChatId = async (req, res) => {
 };
 module.exports = {
   sendMessage,
-  getChatId,
+  getChat,
 };

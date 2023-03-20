@@ -4,7 +4,6 @@ const Post = require("../model/Post");
 const User = require("../model/useSchema");
 const Comment = require("../model/comment");
 const getAllPosts = async (req, res) => {
-  console.log(req.userId);
   try {
     const usersPosts = await User.aggregate([
       {
@@ -127,9 +126,9 @@ const getPosts = async (req, res) => {
 };
 const addLike = async (req, res) => {
   const errors = validationResult(req);
-  if (!errors.isEmpty()) return res.status(400).json(errors);
 
   try {
+    if (!errors.isEmpty()) return res.status(400).json(errors);
     const post = await Post.findById(req.params.postId);
     if (post) {
       if (post.likes.includes(req.userId)) {
@@ -154,12 +153,10 @@ const addLike = async (req, res) => {
 
       return res.status(200).json(post);
     }
-    return res.status(404).json({ msg: "not found this post" });
+    // return res.status(404).json({ msg: "not found this post" });
   } catch (error) {
     res.status(500).json({ msg: "some error in add like" });
   }
-
-  return res.status(200).json("success");
 };
 const addComment = async (req, res) => {
   const errors = validationResult(req);
@@ -172,11 +169,14 @@ const addComment = async (req, res) => {
         sender: req.userId,
         content: req.body.content,
       }).save();
-      await post.updateOne({
-        $addToSet: {
-          comments: newComment._id,
+      const newPost = await post.updateOne(
+        {
+          $addToSet: {
+            comments: newComment._id,
+          },
         },
-      });
+        { new: true }
+      );
 
       return res.status(200).json(post);
     }
@@ -216,10 +216,29 @@ const deleteComment = async (req, res) => {
     res.send(error);
   }
 };
+const getComments = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const post = await Post.findById(id)
+      .select("comments -_id")
+      .populate({
+        path: "comments",
+        populate: {
+          path: "sender",
+          model: "Users",
+          select: "email AvatarUrl fullName city ",
+        },
+      });
+    res.send(post);
+  } catch (error) {
+    res.status(500).json({ msg: "some error get Comments" });
+  }
+};
 module.exports = {
   getAllPosts,
   getPosts,
   addLike,
   addComment,
   deleteComment,
+  getComments,
 };

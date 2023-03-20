@@ -2,15 +2,17 @@ const mongoose = require("mongoose");
 const { isEmail } = require("validator");
 const { hastPassword } = require("../utils/hashPassword");
 const userSchema = new mongoose.Schema({
-  firstName: {
+  fullName: {
     type: String,
-    required: [true, "First Name"],
+    required: [true, "Full Name"],
     trim: true,
   },
-  lastName: {
+  NationalID: {
     type: String,
-    required: [true, "Last Name"],
+    required: [true, "National ID"],
     trim: true,
+    max: 11,
+    min: 11,
   },
   email: {
     type: String,
@@ -43,6 +45,11 @@ const userSchema = new mongoose.Schema({
   phone: {
     type: String,
   },
+  birthDay: {
+    type: Date,
+    required: true,
+    trim: true,
+  },
   posts: [
     {
       type: mongoose.Types.ObjectId,
@@ -69,7 +76,6 @@ const userSchema = new mongoose.Schema({
 });
 
 userSchema.pre("save", async function () {
-  this.fullName = this.firstName + " " + this.lastName;
   this.password = await hastPassword(this.password);
 });
 

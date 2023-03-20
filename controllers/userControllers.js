@@ -23,17 +23,21 @@ const Avatar = async (req, res) => {
 const addSkill = async (req, res) => {
   const { data } = req.body;
   if (!data) return res.status(400).json("Enter Value");
-  const skills = await User.findByIdAndUpdate(
-    req.userId,
-    {
-      $push: {
-        skills: data,
+  try {
+    const skills = await User.findByIdAndUpdate(
+      req.userId,
+      {
+        $push: {
+          skills: data,
+        },
       },
-    },
-    { new: true }
-  ).select("skills -_id");
+      { new: true }
+    ).select("skills -_id");
 
-  res.status(200).json(skills);
+    res.status(200).json(skills);
+  } catch (error) {
+    res.status(500).json({ msg: "some error in adding like" });
+  }
 };
 const getSkills = async (req, res) => {
   const skills = await User.findById(req.userId).select("skills -_id");
@@ -172,6 +176,18 @@ const deleteSkill = async (req, res) => {
     res.status(500).json({ msg: "some error in server delete skill" });
   }
 };
+const getFriends = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId)
+      .select("following -_id")
+      .populate("following", "fullName AvatarUrl email ");
+
+    res.status(200).json(user);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ msg: "something happened in getFriends" });
+  }
+};
 module.exports = {
   Avatar,
   addSkill,
@@ -184,4 +200,5 @@ module.exports = {
   firstVisit,
   checkEmailExist,
   deleteSkill,
+  getFriends,
 };

@@ -1,27 +1,25 @@
 const express = require("express");
 const app = express();
 app.use(express.urlencoded({ extended: true }));
-// app.use(require("cookie-parser")());
 const cors = require("cors");
 var morgan = require("morgan");
 app.use(express.json());
 
 app.use(express.text());
 morgan("tiny");
-app.use("/avatar", express.static(__dirname + "/uploads/avatar"));
+
 app.use(
   cors({
     origin: [
       "https://shopapp-8faf7.firebaseapp.com",
       "https://shopapp-8faf7.web.app",
+      "http://localhost:3000",
     ],
     credentials: true,
   })
 );
 const helmet = require("helmet");
 app.use(helmet());
-
-app.use(morgan("tiny"));
 
 app.use(morgan("tiny"));
 
@@ -43,7 +41,7 @@ const server = app.listen(PORT, () => {
 const io = require("socket.io")(server, {
   pingTimeout: 1000,
   cors: {
-    origin: "http://localhost:3000",
+    origin: "*",
   },
 });
 module.exports = {
@@ -51,13 +49,18 @@ module.exports = {
 };
 require("./socketRequests/socketRequest");
 io.on("connection", (socket) => {
-  socket.on("setup", (roomId) => {
-    socket.join(roomId);
+  socket.on("setUpConnection", (id) => {
+    socket.join(id);
+    console.log("joined");
+    console.log(id);
+    console.log("id");
   });
-  socket.on("joinWith", (roomId) => {
-    socket.join(roomId);
-  });
-  socket.on("newMessage", ({ roomId, data }) => {
-    io.to(roomId).emit("receivedMessage", data);
+  socket.on("newMessage", (data) => {
+    console.log("thisi s data");
+    console.log(data);
+    socket.join(data.receiver);
+    // console.log(socket);
+    socket.to(data.receiver).emit("receiveMessage", data);
+    socket.leave(data.receiver);
   });
 });

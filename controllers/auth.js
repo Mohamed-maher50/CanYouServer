@@ -5,7 +5,7 @@ const Register = async (req, res) => {
   const error = validationResult(req);
   if (!error.isEmpty()) return res.status(400).json(error);
   try {
-    let { _id, email, city, AvatarUrl, id, firstVisit, fullName } =
+    let { _id, email, city, AvatarUrl, id, fullName, firstVisit } =
       await User.create({
         ...req.body,
       });

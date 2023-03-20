@@ -12,6 +12,7 @@ const {
   firstVisit,
   checkEmailExist,
   deleteSkill,
+  getFriends,
 } = require("../controllers/userControllers");
 const { protect } = require("../utils/protect");
 const { body } = require("express-validator");
@@ -20,14 +21,24 @@ const { Register, Login } = require("../controllers/auth");
 
 router.post(
   "/auth/register",
+  body("NationalID")
+    .trim()
+    .not()
+    .isEmpty()
+    .withMessage("NationalID is required"),
   body("email")
     .trim()
     .normalizeEmail()
     .not()
     .custom(checkEmailExist)
     .withMessage("this account already exist"),
-  body("firstName").trim().not().isEmpty().withMessage("firstName is required"),
-  body("lastName").trim().not().isEmpty().withMessage("lastName is required"),
+  body("fullName").trim().not().isEmpty().withMessage("fullName is required"),
+  body("birthDay")
+    .trim()
+    .not()
+    .isEmpty()
+    .isDate()
+    .withMessage("date is required"),
   body("city").trim().not().isEmpty(),
   body("password")
     .not()
@@ -59,5 +70,5 @@ router.get("/profile/:id", getUser);
 router.put("/profile/follow", protect, SendFollow);
 router.post("/createPost", protect, postNewPost);
 router.put("/firstVisit", protect, firstVisit);
-
+router.get("/getFriends", protect, getFriends);
 module.exports = router;

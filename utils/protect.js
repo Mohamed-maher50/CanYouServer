@@ -22,8 +22,7 @@ const protect = async (req, res, next) => {
 
     next();
   } catch (error) {
-    // console.log(error);
-    res.send("done");
+    res.status(404).json({ msg: error });
   }
 };
 const isId = (id) => {
