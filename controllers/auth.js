@@ -11,7 +11,7 @@ const Register = async (req, res) => {
       });
     const token = await jwt.sign(id, process.env.SECRET_KEY_JWT);
     res.status(201).json(
-      JSON.stringify({
+      {
         user: {
           email,
           AvatarUrl,
@@ -21,7 +21,7 @@ const Register = async (req, res) => {
           _id,
         },
         token: token,
-      })
+      }
     );
   } catch (error) {
     res.status(500).json({ error: error });
