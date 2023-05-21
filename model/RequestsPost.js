@@ -17,6 +17,10 @@ module.exports = mongoose.model(
         type: mongoose.Types.ObjectId,
         ref: "Users",
       },
+      isAccepted: {
+        type: Boolean,
+        default: false,
+      },
     },
     {
       timestamps: true,

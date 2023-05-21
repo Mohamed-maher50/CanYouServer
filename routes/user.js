@@ -13,6 +13,7 @@ const {
   checkEmailExist,
   deleteSkill,
   getFriends,
+  UpRate,
 } = require("../controllers/userControllers");
 const { protect } = require("../utils/protect");
 const { body } = require("express-validator");
@@ -70,5 +71,7 @@ router.get("/profile/:id", getUser);
 router.put("/profile/follow", protect, SendFollow);
 router.post("/createPost", protect, postNewPost);
 router.put("/firstVisit", protect, firstVisit);
+
 router.get("/getFriends", protect, getFriends);
+router.post("/done", UpRate);
 module.exports = router;

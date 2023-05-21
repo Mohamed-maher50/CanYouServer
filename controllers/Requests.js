@@ -53,11 +53,16 @@ const getNotifications = async (req, res) => {
 
     res.status(200).json(requests);
   } catch (error) {
-    console.log(error);
     res.status(500).json({ msg: "some error" });
   }
+};
+const accepted = async (req, res) => {
+  const status = await Request.findOneAndUpdate({
+    isAccepted: req.body.isAccepted,
+  });
 };
 module.exports = {
   postCreateRequest,
   getNotifications,
+  accepted,
 };

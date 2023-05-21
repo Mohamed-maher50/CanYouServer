@@ -98,7 +98,6 @@ const getAllPosts = async (req, res) => {
 
     res.send(usersPosts);
   } catch (error) {
-    console.log(error);
     res.status(500).json(error);
   }
 };
@@ -120,7 +119,6 @@ const getPosts = async (req, res) => {
 
     res.status(200).json(posts);
   } catch (error) {
-    console.log(error);
     res.status(500).json({ msg: "some error" });
   }
 };
@@ -182,7 +180,6 @@ const addComment = async (req, res) => {
     }
     return res.status(404).json("not found this posts");
   } catch (error) {
-    console.log(error);
     res.status(500).json({ msg: "some error in add comment" });
   }
 };
@@ -204,15 +201,14 @@ const deleteComment = async (req, res) => {
         },
       }
     );
-    console.log(req.userId);
+
     const isDeleted = await Comment.findOneAndDelete({
       sender: req.userId,
       _id: req.params.commentId,
     });
-    console.log(isDeleted);
+
     res.status(200).json("removed");
   } catch (error) {
-    console.log(error);
     res.send(error);
   }
 };

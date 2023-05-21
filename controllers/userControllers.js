@@ -46,6 +46,7 @@ const getSkills = async (req, res) => {
 const SearchUsers = async (req, res) => {
   try {
     const query = req.query.searchValue;
+
     if (!query) return res.status(200).json(JSON.stringify([]));
     const users = await User.find({
       fullName: {
@@ -158,7 +159,7 @@ const checkEmailExist = async (email, { req }) => {
 };
 const deleteSkill = async (req, res) => {
   const { skill } = req.params;
-  console.log(req.params);
+
   try {
     await User.findByIdAndUpdate(
       req.userId,
@@ -181,13 +182,20 @@ const getFriends = async (req, res) => {
     const user = await User.findById(req.userId)
       .select("following -_id")
       .populate("following", "fullName AvatarUrl email ");
-
     res.status(200).json(user);
   } catch (error) {
-    console.log(error);
     res.status(500).json({ msg: "something happened in getFriends" });
   }
 };
+const UpRate = async (req, res) => {
+  const allUser = await User.updateOne({
+    $set: {
+      rate: req.body.rate,
+    },
+  });
+  allUser.save();
+};
+
 module.exports = {
   Avatar,
   addSkill,
@@ -201,4 +209,5 @@ module.exports = {
   checkEmailExist,
   deleteSkill,
   getFriends,
+  UpRate,
 };

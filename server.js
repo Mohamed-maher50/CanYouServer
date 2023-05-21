@@ -7,8 +7,6 @@ app.use(express.json());
 
 app.use(express.text());
 morgan("tiny");
-<<<<<<< HEAD
-
 app.use(
   cors({
     origin: [
@@ -19,10 +17,10 @@ app.use(
     credentials: true,
   })
 );
-=======
+
 app.use("/avatar", express.static(__dirname + "/uploads/avatar"));
 app.use(cors());
->>>>>>> e80f9065593e6e9b4c311c5c1d7fbb7d1bbbc3dc
+
 const helmet = require("helmet");
 app.use(helmet());
 
@@ -32,10 +30,11 @@ require("dotenv").config();
 require("./db/connection");
 const PORT = process.env.PORT || 4000;
 //
-
+app.use("/courses", require("./routes/Courses"));
 app.use(require("./routes/ChatRoute"));
 app.use(require("./routes/user"));
 app.use(require("./routes/Postes"));
+
 app.use("/api", require("./routes/Requests"));
 app.use((req, res) => {
   res.status(404).json({ msg: "not found this route" });
@@ -56,15 +55,9 @@ require("./socketRequests/socketRequest");
 io.on("connection", (socket) => {
   socket.on("setUpConnection", (id) => {
     socket.join(id);
-    console.log("joined");
-    console.log(id);
-    console.log("id");
   });
   socket.on("newMessage", (data) => {
-    console.log("thisi s data");
-    console.log(data);
     socket.join(data.receiver);
-    // console.log(socket);
     socket.to(data.receiver).emit("receiveMessage", data);
     socket.leave(data.receiver);
   });

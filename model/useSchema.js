@@ -73,6 +73,10 @@ const userSchema = new mongoose.Schema({
       ref: "Chat",
     },
   ],
+  rate: {
+    type: Number,
+    default: 0,
+  },
 });
 
 userSchema.pre("save", async function () {

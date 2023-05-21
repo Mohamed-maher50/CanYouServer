@@ -1,10 +1,6 @@
 const router = require("express").Router();
 const { body, param } = require("express-validator");
-const {
-  sendMessage,
-
-  getChat,
-} = require("../controllers/ChatController");
+const { sendMessage, getChat } = require("../controllers/ChatController");
 const { protect } = require("../utils/protect");
 const { isId } = require("../utils/validations");
 router.post(
