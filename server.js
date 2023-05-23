@@ -14,6 +14,7 @@ app.use(
       "https://shopapp-8faf7.firebaseapp.com",
       "https://canyou-6d6aa.web.app",
       "http://localhost:3000",
+      "*"
     ],
     credentials: true,
   })
