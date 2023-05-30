@@ -13,7 +13,7 @@ const Avatar = async (req, res) => {
       },
       { new: true }
     ).select("email firstVisit AvatarUrl fullName");
-    res.status(200).json(JSON.stringify({ user: userExist }));
+    res.status(200).json({ user: userExist });
   } catch (error) {
     res.status(400).json(error);
   }
@@ -22,7 +22,7 @@ const Avatar = async (req, res) => {
 const SearchUsers = async (req, res) => {
   try {
     const query = req.query.searchValue;
-    if (!query) return res.status(200).json(JSON.stringify([]));
+    if (!query) return res.status(200).json([]);
     const users = await User.find({
       fullName: {
         $regex: query,
@@ -31,7 +31,7 @@ const SearchUsers = async (req, res) => {
     })
       .select("-password -firstName -lastName -firstVisit")
       .limit(5);
-    res.status(200).json(JSON.stringify(users));
+    res.status(200).json(users);
   } catch (error) {
     res.status(500).json({ msg: "some error in server" });
   }
@@ -42,7 +42,7 @@ const getUser = async (req, res) => {
     const user = await User.findById(id).select(
       "-password -firstName -lastName -firstVisit"
     );
-    res.status(200).json(JSON.stringify(user));
+    res.status(200).json(user);
   } catch (error) {
     res.sendStatus(400);
   }
@@ -68,7 +68,7 @@ const SendFollow = async (req, res) => {
       },
       { new: true }
     ).select("-password");
-    res.status(200).json(JSON.stringify({ data: followUser }));
+    res.status(200).json({ data: followUser });
   } catch (error) {
     res.status(500).json({ error: "some error happened in make follow" });
   }
@@ -79,7 +79,7 @@ const getCardInfo = async (req, res) => {
     "followers following fullName AvatarUrl"
   );
 
-  res.status(200).json(JSON.stringify(user));
+  res.status(200).json(user);
 };
 const postNewPost = async (req, res) => {
   try {
