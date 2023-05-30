@@ -10,9 +10,11 @@ morgan("tiny");
 app.use(
   cors({
     origin: [
+      
       "https://shopapp-8faf7.firebaseapp.com",
-      "https://shopapp-8faf7.web.app",
+      "https://canyou-6d6aa.web.app",
       "http://localhost:3000",
+      "*"
     ],
     credentials: true,
   })
