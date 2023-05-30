@@ -61,6 +61,7 @@ const getChat = async (req, res) => {
     }
     res.status(200).json(chat);
   } catch (error) {
+    console.log(error);
     res.status(500).json({ msg: "not allowed" });
   }
 };

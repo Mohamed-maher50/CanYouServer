@@ -5,23 +5,17 @@ const postSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    userType: {
+    imgBody: {
       type: String,
-      required: true,
     },
-    filed: {
-      type: String,
-      required: true,
-    },
-    skills: [String],
     author: {
       type: mongoose.Types.ObjectId,
-      ref: "User",
+      ref: "Users",
     },
     likes: [
       {
         type: mongoose.Types.ObjectId,
-        ref: "User",
+        ref: "Users",
       },
     ],
     comments: [

@@ -5,7 +5,7 @@ module.exports = mongoose.model(
   new mongoose.Schema({
     sender: {
       type: mongoose.Types.ObjectId,
-      ref: "User",
+      ref: "Users",
     },
     content: {
       type: String,
@@ -14,7 +14,7 @@ module.exports = mongoose.model(
     likes: [
       {
         type: mongoose.Types.ObjectId,
-        ref: "User",
+        ref: "Users",
       },
     ],
   })

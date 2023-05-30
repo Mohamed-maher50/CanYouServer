@@ -15,11 +15,21 @@ module.exports = mongoose.model(
       },
       sender: {
         type: mongoose.Types.ObjectId,
+        required: true,
         ref: "Users",
       },
       isAccepted: {
-        type: Boolean,
-        default: false,
+        type: mongoose.Types.ObjectId,
+        ref: "Users",
+      },
+      canceled: {
+        type: [
+          {
+            type: mongoose.Types.ObjectId,
+            ref: "Users",
+          },
+        ],
+        default: [],
       },
     },
     {

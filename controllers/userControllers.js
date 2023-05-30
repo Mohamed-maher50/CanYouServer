@@ -1,7 +1,5 @@
 const User = require("../model/useSchema");
-const jwt = require("jsonwebtoken");
 const Post = require("../model/Post");
-const { validationResult } = require("express-validator/src/validation-result");
 const Avatar = async (req, res) => {
   const { imgUrl } = req.body;
   try {
@@ -20,33 +18,10 @@ const Avatar = async (req, res) => {
     res.status(400).json(error);
   }
 };
-const addSkill = async (req, res) => {
-  const { data } = req.body;
-  if (!data) return res.status(400).json("Enter Value");
-  try {
-    const skills = await User.findByIdAndUpdate(
-      req.userId,
-      {
-        $push: {
-          skills: data,
-        },
-      },
-      { new: true }
-    ).select("skills -_id");
 
-    res.status(200).json(skills);
-  } catch (error) {
-    res.status(500).json({ msg: "some error in adding like" });
-  }
-};
-const getSkills = async (req, res) => {
-  const skills = await User.findById(req.userId).select("skills -_id");
-  res.status(200).json(skills);
-};
 const SearchUsers = async (req, res) => {
   try {
     const query = req.query.searchValue;
-
     if (!query) return res.status(200).json(JSON.stringify([]));
     const users = await User.find({
       fullName: {
@@ -107,17 +82,13 @@ const getCardInfo = async (req, res) => {
   res.status(200).json(JSON.stringify(user));
 };
 const postNewPost = async (req, res) => {
-  const { title, userType, filed, skills } = req.body.data;
   try {
     const savedPost = await Post.create({
-      title,
-      userType,
-      filed,
-      skills,
+      ...req.body,
       author: req.userId,
     });
 
-    const user = await User.findByIdAndUpdate(
+    await User.findByIdAndUpdate(
       req.userId,
       {
         $push: {
@@ -126,9 +97,11 @@ const postNewPost = async (req, res) => {
       },
       { new: true }
     );
+    let post = await savedPost.populate("author", "email AvatarUrl fullName");
 
-    res.status(200).json(JSON.stringify(savedPost));
+    res.status(200).json(post);
   } catch (error) {
+    console.log(error);
     res.status(400).json({ msg: error });
   }
 };
@@ -157,15 +130,43 @@ const checkEmailExist = async (email, { req }) => {
   req.body.user = user;
   return true;
 };
+const addSkill = async (req, res) => {
+  const { skill } = req.body;
+  if (!skill) return res.status(400).json("Enter Value");
+
+  let sk = {
+    skill: skill,
+    user: req.userId,
+  };
+  try {
+    let { skills } = await User.findByIdAndUpdate(
+      req.userId,
+      {
+        $push: {
+          skills: sk,
+        },
+      },
+      { new: true }
+    );
+    res.status(200).json(skills[skills.length - 1]);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ msg: "can't make this addition" });
+  }
+};
+const getSkills = async (req, res) => {
+  const { skills } = await User.findById(req.userId).select("skills -_id");
+  res.status(200).json(skills);
+};
 const deleteSkill = async (req, res) => {
-  const { skill } = req.params;
+  const { id } = req.params;
 
   try {
     await User.findByIdAndUpdate(
       req.userId,
       {
         $pull: {
-          skills: skill,
+          skills: { _id: id },
         },
       },
       {

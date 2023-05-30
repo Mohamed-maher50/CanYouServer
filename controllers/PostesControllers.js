@@ -161,25 +161,29 @@ const addComment = async (req, res) => {
   if (!errors.isEmpty()) return res.status(400).json(errors);
   try {
     const post = await Post.findById(req.params.postId);
+    if (!post) return res.status(400).json({ msg: "not found this post" });
 
-    if (post) {
-      const newComment = await new Comment({
-        sender: req.userId,
-        content: req.body.content,
-      }).save();
-      const newPost = await post.updateOne(
-        {
-          $addToSet: {
-            comments: newComment._id,
-          },
+    var newComment = await new Comment({
+      sender: req.userId,
+      content: req.body.content,
+    }).save();
+
+    await post.updateOne(
+      {
+        $addToSet: {
+          comments: newComment._id,
         },
-        { new: true }
-      );
+      },
+      { new: true }
+    );
+    newComment = await newComment.populate(
+      "sender",
+      "AvatarUrl fullName email"
+    );
 
-      return res.status(200).json(post);
-    }
-    return res.status(404).json("not found this posts");
+    return res.status(200).json(newComment);
   } catch (error) {
+    console.log(error);
     res.status(500).json({ msg: "some error in add comment" });
   }
 };

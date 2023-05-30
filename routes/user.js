@@ -32,6 +32,7 @@ router.post(
     .normalizeEmail()
     .not()
     .custom(checkEmailExist)
+    .not()
     .withMessage("this account already exist"),
   body("fullName").trim().not().isEmpty().withMessage("fullName is required"),
   body("birthDay")
@@ -42,6 +43,8 @@ router.post(
     .withMessage("date is required"),
   body("city").trim().not().isEmpty(),
   body("password")
+    .isLength({ min: 7 })
+    .withMessage(" password should be at least 7 characters. ")
     .not()
     .isEmpty()
     .trim()
@@ -55,23 +58,19 @@ router.post(
 router.post(
   "/auth/login",
   body("email").isEmail().trim().normalizeEmail().custom(checkEmailExist),
-  body("password")
-    .isLength({ min: 2 })
-    .withMessage("password must be at least 7 chars long")
-    .custom(verifyPassword),
+  body("password").custom(verifyPassword).withMessage("password wrong"),
   Login
 );
 router.get("/profile/card/:id", protect, getCardInfo);
 router.put("/avatar", protect, Avatar);
 router.post("/addSkill", protect, addSkill);
-router.delete("/deleteSkill/:skill", protect, deleteSkill);
+router.delete("/deleteSkill/:id", protect, deleteSkill);
 router.get("/getSkills", protect, getSkills);
 router.get("/search", protect, SearchUsers);
 router.get("/profile/:id", getUser);
 router.put("/profile/follow", protect, SendFollow);
 router.post("/createPost", protect, postNewPost);
 router.put("/firstVisit", protect, firstVisit);
-
 router.get("/getFriends", protect, getFriends);
 router.post("/done", UpRate);
 module.exports = router;

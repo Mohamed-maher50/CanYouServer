@@ -1,19 +1,19 @@
 const { validationResult } = require("express-validator");
 const Request = require("../model/RequestsPost");
 const User = require("../model/useSchema");
+const { newNotification } = require("./notification");
 const postCreateRequest = async (req, res) => {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) return res.status(400).json(errors);
   try {
-    const { _id } = await Request.create({
+    const request = await Request.create({
       ...req.body,
       sender: req.userId,
     });
-
     await User.findByIdAndUpdate(req.userId, {
       $push: {
-        requestsPost: _id,
+        requestsPost: request._id,
       },
     });
     await User.updateMany(
@@ -22,12 +22,12 @@ const postCreateRequest = async (req, res) => {
       },
       {
         $push: {
-          requestsPost: _id,
+          requestsPost: request._id,
         },
       }
     );
 
-    res.send("done");
+    res.status(200).json(request);
   } catch (error) {
     res.status(500).json({ errors: "some error happened" });
   }
@@ -35,21 +35,32 @@ const postCreateRequest = async (req, res) => {
 
 const getNotifications = async (req, res) => {
   try {
-    const requests = await User.findById(req.userId)
-      .populate({
-        path: "requestsPost",
-        options: {
-          sort: {
-            createdAt: -1,
+    console.log(req.userId);
+    const user = await User.findById(req.userId).select("city");
+    const requests = await Request.find({
+      $and: [
+        {
+          $or: [
+            { city: user.city },
+            {
+              city: "all",
+            },
+          ],
+        },
+        {
+          canceled: {
+            $ne: [req.userId],
           },
         },
-        populate: {
-          path: "sender",
-          model: "Users",
-          select: "email AvatarUrl fullName ",
+        {
+          sender: {
+            $ne: req.userId,
+          },
         },
-      })
-      .select("requestsPost -_id");
+      ],
+    }).sort({
+      updatedAt: -1,
+    });
 
     res.status(200).json(requests);
   } catch (error) {
@@ -57,12 +68,56 @@ const getNotifications = async (req, res) => {
   }
 };
 const accepted = async (req, res) => {
-  const status = await Request.findOneAndUpdate({
-    isAccepted: req.body.isAccepted,
-  });
+  const { requestID } = req.params;
+  const request = await Request.findById(requestID);
+  try {
+    if (request.sender == req.userId)
+      return res.status(403).json({ msg: "you can accept yourself" });
+    if (request.isAccepted == req.userId)
+      return res.status(403).json({ msg: "you can't accept you yourself" });
+    if (!request.isAccepted) {
+      await request.updateOne({
+        $set: {
+          isAccepted: req.userId,
+        },
+      });
+      const userAccepted = await User.findById(req.userId).select("fullName");
+      let genNotification = await newNotification({
+        from: req.userId,
+        to: request.sender,
+        content: `${userAccepted.fullName} accept your request he need to help you let's go🙋‍♂️🙌.`,
+      });
+      console.log(genNotification);
+      return res.status(200).json(request);
+    }
+    res.status(403).json({ msg: "accepted before" });
+  } catch (error) {
+    res.status(500).json({ msg: "not complete" });
+  }
+};
+const canceled = async (req, res) => {
+  try {
+    const { requestID } = req.params;
+    const request = await Request.findById(requestID);
+    if (request.sender == req.userId)
+      return res.status(403).json({ msg: "you can canceled yourself" });
+    if (request.canceled?.includes(req.userId))
+      return res.status(403).json({ msg: "you already canceled " });
+    if (request.isAccepted == req.userId)
+      return res.status(403).json({ msg: "you already accepted " });
+    await request.updateOne({
+      $addToSet: {
+        canceled: req.userId,
+      },
+    });
+    res.sendStatus(200);
+  } catch (error) {
+    res.status(500).json({ msg: "not complete" });
+  }
 };
 module.exports = {
   postCreateRequest,
   getNotifications,
   accepted,
+  canceled,
 };

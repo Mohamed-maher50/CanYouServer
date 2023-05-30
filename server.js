@@ -34,7 +34,7 @@ app.use("/courses", require("./routes/Courses"));
 app.use(require("./routes/ChatRoute"));
 app.use(require("./routes/user"));
 app.use(require("./routes/Postes"));
-
+app.use("/notification", require("./routes/Notification"));
 app.use("/api", require("./routes/Requests"));
 app.use((req, res) => {
   res.status(404).json({ msg: "not found this route" });
@@ -55,6 +55,10 @@ require("./socketRequests/socketRequest");
 io.on("connection", (socket) => {
   socket.on("setUpConnection", (id) => {
     socket.join(id);
+  });
+  socket.on("acceptRequest", (data) => {
+    console.log(data);
+    socket.emit("received");
   });
   socket.on("newMessage", (data) => {
     socket.join(data.receiver);

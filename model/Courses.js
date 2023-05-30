@@ -4,7 +4,7 @@ const CoursesSchema = new mongoose.Schema(
     author: {
       type: mongoose.Types.ObjectId,
       required: true,
-      ref: "User",
+      ref: "Users",
     },
     coverImg: {
       type: String,

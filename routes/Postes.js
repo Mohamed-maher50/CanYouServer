@@ -16,7 +16,6 @@ router.get("/posts/:id", protect, getPosts);
 router.put(
   "/posts/likes/:postId",
   param("postId").custom(isId),
-
   protect,
   addLike
 );

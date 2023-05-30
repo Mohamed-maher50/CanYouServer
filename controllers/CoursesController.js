@@ -6,8 +6,8 @@ const CourseSubject = require("../model/course");
 const createPlayList = async (req, res) => {
   try {
     const newPlaylist = await new Courses({
-      ...req.body,
       author: req.userId,
+      ...req.body,
     }).save();
     return res.status(200).json(newPlaylist);
   } catch (error) {
@@ -16,15 +16,21 @@ const createPlayList = async (req, res) => {
 };
 // create new video into playList
 const createSubject = async (req, res) => {
+  console.log(req.body.playListId);
   try {
     const { author } = await Courses.findById(req.body.playListId);
-    if (author != req.userId) return res.status(403);
+
+    if (author != req.userId)
+      return res.status(403).json({ msg: "some error" });
+
     const newCourseSubject = await new CourseSubject({
       ...req.body,
       author: req.userId,
     }).save();
+
     return res.status(200).json(newCourseSubject);
   } catch (error) {
+    console.log(error);
     res.status(500).json({ msg: "error" });
   }
 };
