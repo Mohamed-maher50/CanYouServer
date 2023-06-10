@@ -125,6 +125,7 @@ const firstVisit = async (req, res) => {
 };
 const checkEmailExist = async (email, { req }) => {
   const user = await User.findOne({ email });
+  console.log(user);
   if (!user) return Promise.reject("can't not found this account");
   req.body.hashPassword = user.password;
   req.body.user = user;

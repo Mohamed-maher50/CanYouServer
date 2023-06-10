@@ -6,7 +6,7 @@ var morgan = require("morgan");
 app.use(express.json());
 
 app.use(express.text());
-morgan("tiny");
+morgan("dev");
 app.use(
   cors({
     origin: [
@@ -26,7 +26,7 @@ app.use(cors());
 const helmet = require("helmet");
 app.use(helmet());
 
-app.use(morgan("tiny"));
+app.use(morgan("dev"));
 
 require("dotenv").config();
 require("./db/connection");
@@ -38,6 +38,7 @@ app.use(require("./routes/user"));
 app.use(require("./routes/Postes"));
 app.use("/notification", require("./routes/Notification"));
 app.use("/api", require("./routes/Requests"));
+
 app.use((req, res) => {
   res.status(404).json({ msg: "not found this route" });
 });
