@@ -23,7 +23,7 @@ exports.v_register = [
     .not()
     .withMessage("this account already exist"),
   check("fullName").trim().not().isEmpty().withMessage("fullName is required"),
-  check("").trim().isEmpty().withMessage("required date"),
+  check("birthDay").trim().isEmpty().withMessage("required date"),
   check("city").trim().not().isEmpty(),
   check("password")
     .isLength({ min: 7 })
