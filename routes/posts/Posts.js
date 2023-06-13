@@ -1,4 +1,3 @@
-const { body, param } = require("express-validator");
 const { getAllPosts, create } = require("../../controllers/PostesControllers");
 const { protect } = require("../../utils/protect");
 
@@ -11,6 +10,6 @@ router.post("/", protect, create);
 router.get("/", protect, getAllPosts);
 
 // route components post
-router.use("/post", require("./post"));
+router.use("/post", protect, require("./post"));
 
 module.exports = router;
