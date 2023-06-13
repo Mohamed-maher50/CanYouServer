@@ -35,7 +35,6 @@ const postCreateRequest = async (req, res) => {
 
 const getNotifications = async (req, res) => {
   try {
-    console.log(req.userId);
     const user = await User.findById(req.userId).select("city");
     const requests = await Request.find({
       $and: [

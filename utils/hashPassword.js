@@ -5,8 +5,6 @@ const hastPassword = async (password) => {
   const hastedPassword = await bcryptjs.hash(password, salt);
   return hastedPassword;
 };
-
-
 const verifyPassword = async (password, { req }) => {
   const checkResult = await bcryptjs.compare(password, req.body.hashPassword);
 

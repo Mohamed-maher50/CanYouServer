@@ -1,8 +1,8 @@
-const { validationResult } = require("express-validator");
 const { default: mongoose } = require("mongoose");
-const Post = require("../model/Post");
+const Post = require("../model/posts/Post");
 const User = require("../model/useSchema");
-const Comment = require("../model/comment");
+const Comment = require("../model/posts/comment");
+
 const getAllPosts = async (req, res) => {
   try {
     const usersPosts = await User.aggregate([
@@ -101,8 +101,9 @@ const getAllPosts = async (req, res) => {
     res.status(500).json(error);
   }
 };
-const getPosts = async (req, res) => {
+const getPost = async (req, res) => {
   const { id } = req.params;
+
   try {
     const posts = await User.findById(id)
       .populate({
@@ -123,11 +124,8 @@ const getPosts = async (req, res) => {
   }
 };
 const addLike = async (req, res) => {
-  const errors = validationResult(req);
-
   try {
-    if (!errors.isEmpty()) return res.status(400).json(errors);
-    const post = await Post.findById(req.params.postId);
+    const post = await Post.findById(req.params.id);
     if (post) {
       if (post.likes.includes(req.userId)) {
         await post.updateOne(
@@ -151,94 +149,89 @@ const addLike = async (req, res) => {
 
       return res.status(200).json(post);
     }
-    // return res.status(404).json({ msg: "not found this post" });
+    return res.status(404).json({ msg: "not found this post" });
   } catch (error) {
     res.status(500).json({ msg: "some error in add like" });
   }
 };
-const addComment = async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) return res.status(400).json(errors);
+
+const create = async (req, res) => {
   try {
-    const post = await Post.findById(req.params.postId);
-    if (!post) return res.status(400).json({ msg: "not found this post" });
+    const savedPost = await Post.create({
+      ...req.body,
+      author: req.userId,
+    });
 
-    var newComment = await new Comment({
-      sender: req.userId,
-      content: req.body.content,
-    }).save();
-
-    await post.updateOne(
+    await User.findByIdAndUpdate(
+      req.userId,
       {
-        $addToSet: {
-          comments: newComment._id,
+        $push: {
+          posts: savedPost._id,
         },
       },
       { new: true }
     );
-    newComment = await newComment.populate(
-      "sender",
-      "AvatarUrl fullName email"
-    );
 
+    let post = await savedPost.populate("author", "email AvatarUrl fullName");
+
+    res.status(200).json(post);
+  } catch (error) {
+    res.status(400).json({ msg: error });
+  }
+};
+
+// add comment for specific post
+const addComment = async (req, res) => {
+  try {
+    var newComment = await new Comment({
+      postId: req.params.id,
+      sender: req.userId,
+      content: req.body.content,
+    }).save();
     return res.status(200).json(newComment);
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ msg: "some error in add comment" });
+    // 422 Unprocessable Entity :not complete data eg/json or body
+    res.status(422).json({ msg: error });
   }
 };
-const deleteComment = async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) return res.status(400).json(errors);
-  try {
-    const isOwnerPost = await Post.findOneAndUpdate(
-      {
-        comments: {
-          $elemMatch: {
-            $eq: req.params.commentId,
-          },
-        },
-      },
-      {
-        $pull: {
-          comments: req.params.commentId,
-        },
-      }
-    );
 
-    const isDeleted = await Comment.findOneAndDelete({
-      sender: req.userId,
-      _id: req.params.commentId,
-    });
-
-    res.status(200).json("removed");
-  } catch (error) {
-    res.send(error);
-  }
-};
+//get comments for specific post
 const getComments = async (req, res) => {
   const { id } = req.params;
   try {
-    const post = await Post.findById(id)
-      .select("comments -_id")
-      .populate({
-        path: "comments",
-        populate: {
-          path: "sender",
-          model: "Users",
-          select: "email AvatarUrl fullName city ",
-        },
-      });
-    res.send(post);
+    let allComments = await Comment.find({ postId: id });
+    res.status(200).json(allComments);
   } catch (error) {
-    res.status(500).json({ msg: "some error get Comments" });
+    res.status(400).json({ msg: error });
   }
 };
+//delete comment for specific post
+const deleteComment = async (req, res) => {
+  try {
+    const comment = await Comment.findOne({
+      sender: req.userId,
+      _id: req.params.id,
+    });
+    if (!comment)
+      return res.status(404).json({ msg: "not found this comment" });
+    if (comment.sender != req.userId)
+      return res
+        .status(403)
+        .json({ msg: "unauthorized only owner can delete " });
+    await comment.deleteOne();
+    res.status(200).json("removed");
+  } catch (error) {
+    // 422 Unprocessable Entity :not complete data eg/json or body
+    res.status(422).json({ msg: error });
+  }
+};
+
 module.exports = {
   getAllPosts,
-  getPosts,
+  getPost,
   addLike,
   addComment,
   deleteComment,
+  create,
   getComments,
 };

@@ -6,6 +6,7 @@ const newNotification = async (data) => {
 };
 const getNotification = async (req, res) => {
   try {
+    console.log(req.userId);
     const allNotifications = await Notification.find({
       to: req.userId,
     }).populate("from", "fullName AvatarUrl email");

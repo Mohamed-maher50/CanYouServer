@@ -1,5 +1,5 @@
 const User = require("../model/useSchema");
-const Post = require("../model/Post");
+const Post = require("../model/posts/Post");
 const Avatar = async (req, res) => {
   const { imgUrl } = req.body;
   try {
@@ -81,30 +81,7 @@ const getCardInfo = async (req, res) => {
 
   res.status(200).json(user);
 };
-const postNewPost = async (req, res) => {
-  try {
-    const savedPost = await Post.create({
-      ...req.body,
-      author: req.userId,
-    });
 
-    await User.findByIdAndUpdate(
-      req.userId,
-      {
-        $push: {
-          posts: savedPost._id,
-        },
-      },
-      { new: true }
-    );
-    let post = await savedPost.populate("author", "email AvatarUrl fullName");
-
-    res.status(200).json(post);
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({ msg: error });
-  }
-};
 const firstVisit = async (req, res) => {
   try {
     const user = await User.findByIdAndUpdate(
@@ -125,7 +102,7 @@ const firstVisit = async (req, res) => {
 };
 const checkEmailExist = async (email, { req }) => {
   const user = await User.findOne({ email });
-  console.log(user);
+
   if (!user) return Promise.reject("can't not found this account");
   req.body.hashPassword = user.password;
   req.body.user = user;
@@ -151,7 +128,6 @@ const addSkill = async (req, res) => {
     );
     res.status(200).json(skills[skills.length - 1]);
   } catch (error) {
-    console.log(error);
     return res.status(500).json({ msg: "can't make this addition" });
   }
 };
@@ -206,7 +182,7 @@ module.exports = {
   getUser,
   SendFollow,
   getCardInfo,
-  postNewPost,
+
   firstVisit,
   checkEmailExist,
   deleteSkill,

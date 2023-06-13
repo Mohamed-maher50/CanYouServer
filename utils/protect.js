@@ -12,12 +12,12 @@ const protect = async (req, res, next) => {
       (err, result) => {
         if (err?.name == "JsonWebTokenError")
           return { msg: "please try login" };
-
         return result;
       }
     );
     if (result.msg) return res.status(400).send("please try login");
     if (!result) return res.status(400).send("unauthorized");
+
     req.userId = result;
 
     next();
