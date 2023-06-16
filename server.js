@@ -1,10 +1,13 @@
 const express = require("express");
 const app = express();
-app.use(express.urlencoded({ extended: true }));
 const cors = require("cors");
 var morgan = require("morgan");
-app.use(express.json());
+const helmet = require("helmet");
 
+const PORT = process.env.PORT || 4000;
+// server configuration
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.use(express.text());
 morgan("tiny");
 app.use(
@@ -18,28 +21,28 @@ app.use(
     credentials: true,
   })
 );
-
-app.use("/avatar", express.static(__dirname + "/uploads/avatar"));
 app.use(cors());
-
-const helmet = require("helmet");
 app.use(helmet());
-
 app.use(morgan("tiny"));
-
 require("dotenv").config();
 require("./db/connection");
-const PORT = process.env.PORT || 4000;
-//
-app.use("/courses", require("./routes/Courses"));
-app.use(require("./routes/ChatRoute"));
-app.use(require("./routes/user"));
+
+// routes
+
+app.use("/api/playlist", require("./routes/playlists/playlists"));
+app.use("/api/chat/", require("./routes/Chat"));
+app.use("/auth", require("./routes/Auth"));
+app.use("/api/user", require("./routes/user/user"));
 app.use("/api/posts/", require("./routes/posts/Posts"));
 app.use("/notification", require("./routes/Notification"));
 app.use("/api", require("./routes/Requests"));
+
+// message for not found this route
 app.use((req, res) => {
   res.status(404).json({ msg: "not found this route" });
 });
+
+// server listen
 const server = app.listen(PORT, () => {
   console.log("listen in port 4000");
 });
@@ -52,19 +55,10 @@ const io = require("socket.io")(server, {
 module.exports = {
   io,
 };
+
 try {
-  require("./socketRequests/socketRequest");
-  io.on("connection", (socket) => {
-    socket.on("setUpConnection", (id) => {
-      socket.join(id);
-    });
-    socket.on("acceptRequest", (data) => {
-      socket.emit("received");
-    });
-    socket.on("newMessage", (data) => {
-      socket.join(data.receiver);
-      socket.to(data.receiver).emit("receiveMessage", data);
-      socket.leave(data.receiver);
-    });
-  });
-} catch (error) {}
+  require("./web/socketRequest");
+  require("./web/Chat");
+} catch (error) {
+  console.log(error);
+}

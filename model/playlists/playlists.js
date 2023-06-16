@@ -35,5 +35,5 @@ const CoursesSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-const Courses = mongoose.model("CoursesPlaylist", CoursesSchema);
+const Courses = mongoose.model("Playlist", CoursesSchema);
 module.exports = Courses;

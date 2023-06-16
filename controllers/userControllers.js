@@ -3,7 +3,7 @@ const Post = require("../model/posts/Post");
 const Avatar = async (req, res) => {
   const { imgUrl } = req.body;
   try {
-    const userExist = await User.findByIdAndUpdate(
+    const user = await User.findByIdAndUpdate(
       req.userId,
       {
         $set: {
@@ -13,7 +13,7 @@ const Avatar = async (req, res) => {
       },
       { new: true }
     ).select("email firstVisit AvatarUrl fullName");
-    res.status(200).json({ user: userExist });
+    res.status(200).json({ user });
   } catch (error) {
     res.status(400).json(error);
   }
@@ -48,9 +48,9 @@ const getUser = async (req, res) => {
   }
 };
 const SendFollow = async (req, res) => {
-  const { id } = req.body;
+  const { id } = req.params;
   try {
-    const following = await User.findByIdAndUpdate(
+    await User.findByIdAndUpdate(
       req.userId,
       {
         $addToSet: {
@@ -73,31 +73,38 @@ const SendFollow = async (req, res) => {
     res.status(500).json({ error: "some error happened in make follow" });
   }
 };
-const getCardInfo = async (req, res) => {
-  const { id } = req.params;
-  const user = await User.findById(id).select(
-    "followers following fullName AvatarUrl"
-  );
 
-  res.status(200).json(user);
+// to find user data
+const Details = async (req, res) => {
+  // get User id from params request
+  const { id } = req.params;
+
+  try {
+    // then find user by id from mongodb
+    // select will make select specific data from document
+    const user = await User.findById(id).select(
+      "followers following fullName AvatarUrl"
+    );
+
+    // after find response will be user data
+    // 200 success
+    res.status(200).json(user);
+  } catch (error) {
+    // if there error then return error and skip request
+    res.status(422).json({ msg: error });
+  }
 };
 
 const firstVisit = async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(
-      req.userId,
-      {
-        $set: {
-          firstVisit: false,
-        },
+    await User.findByIdAndUpdate(req.userId, {
+      $set: {
+        firstVisit: false,
       },
-      {
-        new: true,
-      }
-    );
-    res.status(200).send({ msg: "done" });
+    });
+    res.sendStatus(200);
   } catch (error) {
-    res.status(400).json({ msg: "done" });
+    res.status(500).json({ msg: "done" });
   }
 };
 const checkEmailExist = async (email, { req }) => {
@@ -109,31 +116,30 @@ const checkEmailExist = async (email, { req }) => {
   return true;
 };
 const addSkill = async (req, res) => {
-  const { skill } = req.body;
-  if (!skill) return res.status(400).json("Enter Value");
-
-  let sk = {
-    skill: skill,
-    user: req.userId,
-  };
   try {
     let { skills } = await User.findByIdAndUpdate(
       req.userId,
       {
         $push: {
-          skills: sk,
+          skills: req.body.skill,
         },
       },
       { new: true }
     );
-    res.status(200).json(skills[skills.length - 1]);
+
+    res.status(200).json(skills);
   } catch (error) {
     return res.status(500).json({ msg: "can't make this addition" });
   }
 };
 const getSkills = async (req, res) => {
-  const { skills } = await User.findById(req.userId).select("skills -_id");
-  res.status(200).json(skills);
+  try {
+    const { skills } = await User.findById(req.userId).select("skills -_id");
+    console.log(skills);
+    res.status(200).json(skills);
+  } catch (error) {
+    res.status(422).json({ msg: error });
+  }
 };
 const deleteSkill = async (req, res) => {
   const { id } = req.params;
@@ -162,7 +168,7 @@ const getFriends = async (req, res) => {
       .populate("following", "fullName AvatarUrl email ");
     res.status(200).json(user);
   } catch (error) {
-    res.status(500).json({ msg: "something happened in getFriends" });
+    res.status(500).json({ msg: error });
   }
 };
 const UpRate = async (req, res) => {
@@ -181,8 +187,7 @@ module.exports = {
   SearchUsers,
   getUser,
   SendFollow,
-  getCardInfo,
-
+  Details,
   firstVisit,
   checkEmailExist,
   deleteSkill,

@@ -9,9 +9,6 @@ const { protect } = require("../../utils/protect");
 
 const router = require("express").Router();
 
-// get specific post
-router.get("/:id", getPost);
-
 // add comment to specific post
 router.post("/:id/comment/", addComment);
 

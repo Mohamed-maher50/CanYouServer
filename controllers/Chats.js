@@ -1,12 +1,7 @@
 const User = require("../model/useSchema");
-const Chat = require("../model/Chats");
-const Message = require("../model/messages");
-const { validationResult } = require("express-validator");
-
+const Chat = require("../model/chat/Chats");
+const Message = require("../model/chat/messages");
 const sendMessage = async (req, res) => {
-  const result = validationResult(req);
-  if (!result.isEmpty()) return res.status(400).json(result.array());
-
   try {
     const newMessage = await new Message({
       sender: req.userId,
@@ -25,12 +20,10 @@ const sendMessage = async (req, res) => {
   }
 };
 const getChat = async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) return res.status(400).json(errors);
   try {
     const chat = await Chat.findOne({
       $and: [
-        { users: { $elemMatch: { $eq: req.params.chatWith } } },
+        { users: { $elemMatch: { $eq: req.params.id } } },
         { users: { $elemMatch: { $eq: req.userId } } },
       ],
     })
@@ -53,19 +46,35 @@ const getChat = async (req, res) => {
 
     if (!chat) {
       const createChat = await Chat.create({
-        users: [req.userId, req.params.chatWith],
+        users: [req.userId, req.params.id],
         messages: [],
       });
       const chat = await Chat.findById(createChat._id).populate("users");
       return res.status(200).json(chat);
     }
+
     res.status(200).json(chat);
   } catch (error) {
-    console.log(error);
     res.status(500).json({ msg: "not allowed" });
+  }
+};
+
+// to get All chats with specific user
+
+const Chats = async (req, res) => {
+  try {
+    const chats = await Chat.find({
+      users: {
+        $eq: req.userId,
+      },
+    });
+    res.status(200).json(chats);
+  } catch (error) {
+    res.status(400).json({ msg: error });
   }
 };
 module.exports = {
   sendMessage,
   getChat,
+  Chats,
 };

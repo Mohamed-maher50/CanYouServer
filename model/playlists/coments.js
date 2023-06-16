@@ -8,7 +8,7 @@ const commentSchema = new mongoose.Schema(
     },
     Course: {
       type: mongoose.Types.ObjectId,
-      ref: "Course",
+      ref: "Video",
     },
     feedBack: {
       type: String,
@@ -23,4 +23,4 @@ const commentSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
-module.exports = mongoose.model("courseComments", commentSchema);
+module.exports = mongoose.model("playListComment", commentSchema);

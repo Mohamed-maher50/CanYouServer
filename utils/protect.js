@@ -6,20 +6,9 @@ const protect = async (req, res, next) => {
   req.token = token;
 
   try {
-    const result = await jwt.verify(
-      token,
-      process.env.SECRET_KEY_JWT,
-      (err, result) => {
-        if (err?.name == "JsonWebTokenError")
-          return { msg: "please try login" };
-        return result;
-      }
-    );
-    if (result.msg) return res.status(400).send("please try login");
-    if (!result) return res.status(400).send("unauthorized");
-
-    req.userId = result;
-
+    const { userId } = await jwt.verify(token, process.env.SECRET_KEY_JWT);
+    if (!userId) return res.status(400).json({ msg: "unauthorized" });
+    req.userId = userId;
     next();
   } catch (error) {
     res.status(404).json({ msg: error });

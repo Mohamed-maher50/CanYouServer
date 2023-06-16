@@ -15,7 +15,7 @@ const CourseSchema = new mongoose.Schema(
     },
     playListId: {
       type: mongoose.Types.ObjectId,
-      ref: "CoursesPlaylist",
+      ref: "Playlist",
       required: true,
     },
     completed: [
@@ -27,5 +27,5 @@ const CourseSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-const Course = mongoose.model("Course", CourseSchema);
+const Course = mongoose.model("Video", CourseSchema);
 module.exports = Course;

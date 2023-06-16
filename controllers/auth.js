@@ -1,24 +1,18 @@
 const { validationResult } = require("express-validator/src/validation-result");
 const User = require("../model/useSchema");
 const Token = require("../model/verifyToken");
-const jwt = require("jsonwebtoken");
 
 const { sendMail, genURL } = require("../utils/SendMail");
-const { genToken } = require("../utils/genToken");
+const genJwtToken = require("../utils/genJwtToken");
 
 const Register = async (req, res) => {
-  const error = validationResult(req);
-  if (!error.isEmpty()) return res.status(400).json(error);
   try {
-    let { _id, email, city, AvatarUrl, id, fullName, firstVisit, isVerified } =
+    // sign Up
+    let { _id, email, city, AvatarUrl, fullName, firstVisit, isVerified } =
       await User.create({
         ...req.body,
       });
-    const { token } = await genToken(_id);
-
-    await sendMail(email.trim(), "verify Your email 🙌❤️", genURL(_id, token));
-    const userToken = await jwt.sign(id, process.env.SECRET_KEY_JWT);
-
+    const token = genJwtToken({ userId: _id });
     res.status(201).json({
       user: {
         email,
@@ -29,21 +23,23 @@ const Register = async (req, res) => {
         city,
         _id,
       },
-      token: userToken,
+      token,
     });
   } catch (error) {
-    console.log(error);
     res.status(500).json({ error: error });
   }
 };
+
 const Login = async (req, res) => {
-  const error = validationResult(req);
-  if (!error.isEmpty()) return res.status(400).json(error);
   try {
-    if (!req.body.user) return res.status(401).json({ error: "ldkf" });
-    var { email, AvatarUrl, fullName, id, _id, firstVisit, city } =
-      req.body.user;
-    const token = await jwt.sign(id, process.env.SECRET_KEY_JWT);
+    // Login
+    var { email, AvatarUrl, fullName, _id, firstVisit, city } = req.body.user;
+
+    //genJwtToken will generate new Token content user id
+    const token = genJwtToken({ userId: _id });
+
+    // response will contain user data
+    // status 200 => request has been created
     return res.status(201).json({
       user: {
         email,
@@ -56,9 +52,12 @@ const Login = async (req, res) => {
       token,
     });
   } catch (error) {
-    res.status(500).json({ error: error });
+    // 422 Unprocessable Entity  server was unable to process the entity (e.g., JSON payload)
+    // then response with error and skip this error
+    res.status(422).json({ error: error });
   }
 };
+
 const verifyEmail = async (req, res) => {
   const { id, token } = req.params;
   try {
@@ -80,3 +79,4 @@ module.exports = {
   Login,
   verifyEmail,
 };
+// await sendMail(email.trim(), "verify Your email 🙌❤️", genURL(_id, token));
